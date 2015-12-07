@@ -1,7 +1,7 @@
 class FullVendingMachine
   attr_reader :charged, :sales, :change_stocks
   # 使用可能なお金
-  AVAILABLE_MONEY = [10, 50, 100, 500, 1000].freeze
+  AVAILABLE_MONEY = [10, 50, 100, 500, 1000].sort { |a, b| b <=> a }.freeze
 
   def initialize
     # 投入金額
@@ -109,8 +109,7 @@ class FullVendingMachine
       # 再帰計算用
       temp_change_count_list = {}
 
-
-      AVAILABLE_MONEY.sort { |a, b| b <=> a }.each do |value|
+      AVAILABLE_MONEY.each do |value|
         # 釣り銭ストックが無い場合
         if @temp_change_stocks[value] <= 0
           temp_change_count_list[value] = 0
