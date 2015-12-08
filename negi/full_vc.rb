@@ -1,5 +1,5 @@
 class FullVendingMachine
-  attr_reader :charged, :sales, :change_stocks
+  attr_reader :charged, :sales
   # 使用可能なお金
   AVAILABLE_MONEY = [10, 50, 100, 500, 1000].sort { |a, b| b <=> a }.freeze
 
@@ -17,14 +17,14 @@ class FullVendingMachine
     @stocks_management.add_stock('water', Drink.new('水', 100), 5)
 
     # 釣り銭ストック
-    @change_stocks = Hash.new{ |hash, key| hash[key] = 10 }
-    AVAILABLE_MONEY.each { |change_value| @change_stocks[change_value] }
+    @change_stocks = ChangeStocksManagement.new
+    AVAILABLE_MONEY.each { |money| @change_stocks.add_stocks(money, 10) }
   end
 
   # お金投入
   def charging(money)
     return money unless AVAILABLE_MONEY.include?(money)
-    add_change_stoks(money)
+    @change_stocks.add_stocks(money)
     @charged += money
   end
 
@@ -40,6 +40,10 @@ class FullVendingMachine
     @stocks_management.all_stocks
   end
 
+  def change_stocks
+    @change_stocks.all_stocks
+  end
+
   # 購入可否チェック
   def purchasable?(drink_name)
     return false unless @charged >= @stocks_management.drink_info(drink_name).price
@@ -52,7 +56,7 @@ class FullVendingMachine
     purchasable_list = []
 
     all_stocks.each do |drink_name, value|
-      purchasable_list << drink_name.to_s if self.purchasable?(drink_name)
+      purchasable_list << drink_name.to_s if purchasable?(drink_name)
     end
 
     purchasable_list
@@ -90,10 +94,6 @@ class FullVendingMachine
     calc_reduce_change_stocks(@charged - drink_price)
   end
 
-  # 釣り銭ストックに投入金額を補充する
-  def add_change_stoks(money)
-    @change_stocks[money] += 1
-  end
 
   # 釣り銭ストック計算
   def calc_reduce_change_stocks(money)
@@ -197,6 +197,32 @@ class Drink
   def initialize(name, price)
     @name = name
     @price = price
+  end
+end
+
+class ChangeStocksManagement
+  attr_reader :all_stocks
+
+  def initialize
+    @all_stocks = {}
+  end
+
+  # 指定したお金のストックを追加する
+  def add_stocks(money, stocks=1)
+    @all_stocks.merge!({money => stocks}){ |key, v1, v2| v1 + v2 }
+  end
+
+  # 指定したお金のストックを減らす
+  def reduce_stock(money, stocks)
+    if enough_stocks?(money, stocks)
+      @all_stocks[money] -= stocks
+    else
+      false
+    end
+  end
+
+  def enough_stocks?(money, stocks)
+    @all_stocks[money] <= stocks
   end
 end
 
