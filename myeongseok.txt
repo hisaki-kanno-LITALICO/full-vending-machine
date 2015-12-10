@@ -1,0 +1,13 @@
+pry
+require '/Users/myeongseok.jeong/full-vending-machine/myeongseok.rb'
+machine = Machine.new()
+cola = Drink.new('cola', 120, 5)
+redbull = Drink.new('redbull', 150, 5)
+water = Drink.new('water', 100, 5)
+zero = Drink.new('zero', 120, 5)
+tea = Drink.new('tea', 120, 5)
+machine.add_product_to_machine(cola)
+machine.add_product_to_machine(redbull)
+machine.add_product_to_machine(water)
+machine.add_product_to_machine(zero)
+machine.add_product_to_machine(tea)
